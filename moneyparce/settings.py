@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,18 +20,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k6z7@*lph3ku2-iu+6qjlib1dfv*2d4dvs8!_acn+bhm0ad$-h'
+def required_env(name):
+    value = os.environ.get(name)
+    if not value:
+        raise ImproperlyConfigured(f"Set the {name} environment variable.")
+    return value
+
+
+def env_list(name, default=""):
+    return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
+
+
+# Secrets must be supplied by the deployment environment, never committed.
+SECRET_KEY = required_env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() in {'1', 'true', 'yes', 'on'}
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "https://localhost:8000",
-]
+CSRF_TRUSTED_ORIGINS = env_list(
+    'DJANGO_CSRF_TRUSTED_ORIGINS',
+    'http://localhost:8000,https://localhost:8000',
+)
 
 
 # Application definition
@@ -110,7 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-FIELD_ENCRYPTION_KEY = 'PEhNwQwtOOYmeW148RwfHJ2vMonJEOMZSpzQBoILrdQ='
+FIELD_ENCRYPTION_KEY = required_env('FIELD_ENCRYPTION_KEY')
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -140,11 +152,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Use your email provider's SMTP
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'frankie.t.wu@gmail.com'
-EMAIL_HOST_PASSWORD = 'wmfn aisi hzdr zphq'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
-PLAID_CLIENT_ID = '6809fa09b830b6002197b559'
-PLAID_SECRET = '4541f61eadcb05731b4fd11e1ca927'
-PLAID_ENV = 'sandbox'
+PLAID_CLIENT_ID = os.environ.get('PLAID_CLIENT_ID', '')
+PLAID_SECRET = os.environ.get('PLAID_SECRET', '')
+PLAID_ENV = os.environ.get('PLAID_ENV', 'sandbox')
 
-TOGETHER_API_KEY = "a0005f719c8b7a63064609d2656edf909c9fd98e00d093a9194fb3ba643ab6ca"
+TOGETHER_API_KEY = os.environ.get('TOGETHER_API_KEY', '')

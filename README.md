@@ -18,11 +18,11 @@ MoneyParce helps users manage their financial life through a clean web interface
 
 ## Tech Stack
 
-**Frontend:** React, JavaScript, HTML/CSS  
-**Backend:** Python, Flask, REST APIs  
-**Databases:** PostgreSQL, MongoDB  
-**ML/NLP:** OpenAI models, spaCy, scikit-learn  
-**Infrastructure:** Docker, AWS EC2  
+**Frontend:** Django templates, HTML/CSS
+**Backend:** Python, Django
+**Database:** SQLite for local development
+**Integrations:** Plaid, Together AI, SMTP email
+**Deployment:** Gunicorn, WhiteNoise, Render
 
 ## Project Highlights
 
@@ -35,3 +35,19 @@ MoneyParce helps users manage their financial life through a clean web interface
 ```bash
 git clone https://github.com/abiswas14/MoneyParce.git
 cd MoneyParce
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+Export the values from `.env` in your shell or configure them in your hosting
+provider. `DJANGO_SECRET_KEY` and `FIELD_ENCRYPTION_KEY` are required. Generate
+fresh values for them; do not reuse credentials that have ever been committed.
+
+Then initialize the database and start the development server:
+
+```bash
+python manage.py migrate
+python manage.py runserver
+```
